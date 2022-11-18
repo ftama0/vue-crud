@@ -41,7 +41,7 @@ class Product extends Controller
             'product_name' => $json->product_name,
             'product_price' => $json->product_price
         ];
-        var_dump('ini data', $data);
+        //var_dump('ini data', $data);
         $model->update($id, $json);
     }
 
