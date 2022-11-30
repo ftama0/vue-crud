@@ -39,9 +39,8 @@ $routes->get('/', 'Product::index');
 $routes->get('product/getproduct', 'Product::getProduct');
 $routes->post('product/save', 'Product::save');
 $routes->put('product/update/(:any)', 'Product::update/$1');
-// $routes->post('product/baru(:any)', 'Product::update/$1');
-// $routes->get('getEdit/(:any)', 'DemurageInvoice::getEdit/$1');
 $routes->delete('product/delete/(:any)', 'Product::delete/$1');
+$routes->post('product/uploadFoto', 'Product::do_upload');
 
 /*
  * --------------------------------------------------------------------

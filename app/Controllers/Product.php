@@ -5,6 +5,7 @@ namespace App\Controllers;
 use CodeIgniter\Controller;
 use App\Models\ProductModel;
 use CodeIgniter\API\ResponseTrait;
+use CodeIgniter\I18n\Time;
 
 class Product extends Controller
 {
@@ -13,42 +14,91 @@ class Product extends Controller
     {
         echo view('product_view');
     }
-
     public function getProduct()
     {
-        $model = new ProductModel();
-        $data = $model->findAll();
-        return json_encode($data);
+        $db = \Config\Database::connect();
+        $query = $db->query("
+        SELECT *
+        FROM product
+        WHERE DELETED_AT IS null;");;
+        return $this->respond($query->getResult(), 200);
     }
 
+    // -----------------versi json_Encode
+    // public function getProduct()
+    // {
+    //     $model = new ProductModel();
+    //     $data = $model->findAll();
+    //     return json_encode($data);
+    // }
+
+    // public function save()
+    // {
+    //     $model = new ProductModel();
+    //     $json = $this->request->getJSON();
+    //     // $data = [
+    //     //     'product_name' => $json->product_name,
+    //     //     'product_price' => $json->product_price
+    //     // ];
+
+    //     $Delete['CREATED_AT'] = Time::now()->format('Y-m-d H:i:s');
+    //     $model->insert($json);
+    // }
     public function save()
     {
-        $model = new ProductModel();
-        $json = $this->request->getJSON();
+        $product_name = $this->request->getVar('product_name');
+        $product_price = $this->request->getVar('product_price');
+        $expired = $this->request->getVar('expired');
+        $validation = \Config\Services::validation();
+        $attch = $validation->setRules([
+            'attch' => 'uploaded[file]|max_size[file,5000]|ext_in[pdf],'
+        ]);
+        if ($attch = $this->request->getFile('attch')) {
+            if ($attch->isValid() && !$attch->hasMoved()) {
+                // Get att name and extension
+                $name = $attch->getName();
+                $ext = $attch->getClientExtension();
+                $filepath = WRITEPATH . 'uploads/' . $attch->store();
+                // Response
+                $data['success'] = 1;
+                $data['message'] = 'Uploaded Successfully!';
+                $data['filepath'] = $filepath;
+                $data['extension'] = $ext;
+            } else {
+                // Response
+                $data['success'] = 2;
+                $data['message'] = 'File not uploaded.';
+            }
+        }
         $data = [
-            'product_name' => $json->product_name,
-            'product_price' => $json->product_price
+            'product_name' => $product_name,
+            'product_price'  => $product_price,
+            'expired'       => $expired,
+            'attch' => $filepath,
+            'CREATED_AT'  => Time::now()->format('Y-m-d H:i:s'),
         ];
-        $model->insert($data);
+        $insert_Data = array_filter($data, function ($var) {
+            return $var != null;
+        });
+        $SaveModul = new ProductModel();
+        $SaveModul->save($insert_Data);
     }
 
     public function update($id)
     {
         $model = new ProductModel();
         $json = $this->request->getJSON();
-        var_dump($json);
-        $data = [
-            'product_name' => $json->product_name,
-            'product_price' => $json->product_price
-        ];
-        //var_dump('ini data', $data);
+        $json->UPDATED_AT = Time::now()->format('Y-m-d H:i:s');
         $model->update($id, $json);
     }
 
 
-    public function delete($id = null)
+    public function delete($id)
     {
         $model = new ProductModel();
-        $model->delete($id);
+        $Delete = $model->find($id);
+        $Delete['DELETED_AT'] = Time::now()->format('Y-m-d H:i:s');
+        var_dump($Delete);
+        $model->save($Delete);
     }
 }
