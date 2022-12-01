@@ -38,10 +38,15 @@ $routes->set404Override();
 $routes->get('/', 'Product::index');
 $routes->get('product/getproduct', 'Product::getProduct');
 $routes->post('product/save', 'Product::save');
+$routes->post('product/upload', 'Product::upload');
 $routes->put('product/update/(:any)', 'Product::update/$1');
 $routes->delete('product/delete/(:any)', 'Product::delete/$1');
-$routes->post('product/uploadFoto', 'Product::do_upload');
 
+
+$routes->group('testing', function ($routes) {
+    $routes->get('/', 'Testing::index');
+    $routes->post('save', 'Testing::save');
+});
 /*
  * --------------------------------------------------------------------
  * Additional Routing

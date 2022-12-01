@@ -61,6 +61,7 @@
                                     vdata={}" type="button" style="margin-bottom: 10px;" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                         Add Data
                     </button>
+                    <li class="breadcrumb-item"><a href="<?= site_url("/testing") ?>">testing</a></li>
                     <form class="d-flex">
                         <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" v-model="search">
                     </form>
@@ -76,6 +77,7 @@
                             <th scope="col">Product Name</th>
                             <th scope="col">Price</th>
                             <th scope="col">Expired</th>
+                            <th scope="col">Download</th>
                             <th scope="col">Action</th>
                         </tr>
                     </thead>
@@ -84,10 +86,11 @@
                             <td>{{ product.product_name }}</td>
                             <td>Rp. {{ product.product_price }}</td>
                             <td>{{ product.expired }}</td>
+                            <td> <a style="margin-left: 3px; margin-top: 5px;" class="btn btn-info rounded-circle text-sm"><i class="ri-download-cloud-fill" class="my-1 py-1 ri-file-edit-fill text-sm"></i></a></td>
                             <td>
-                                <a style="margin-left: 3px; margin-top: 5px;" @click="getItem(product,'update')" class="btn btn-sm btn-primary rounded-circle text-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-file-edit-fill text-sm" style="font-size : 12px;"></i></a>
-                                <a style="margin-left: 3px; margin-top: 5px;" @click="getItem(product,'delete')" class="btn btn-sm btn-danger rounded-circle text-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-delete-bin-2-fill text-sm" style="font-size : 12px;"></i></a>
-                                <a style="margin-left: 3px; margin-top: 5px;" @click="getItem(product,'view')" class="btn btn-sm btn-warning rounded-circle text-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-search-line text-sm" style="font-size : 12px;"></i></a>
+                                <a style="margin-left: 3px; margin-top: 5px;" @click="getItem(product,'update')" class="btn btn-sm btn-primary rounded-circle text-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-file-edit-fill text-sm"></i></a>
+                                <a style="margin-left: 3px; margin-top: 5px;" @click="getItem(product,'delete')" class="btn btn-sm btn-danger rounded-circle text-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-delete-bin-2-fill text-sm"></i></a>
+                                <a style="margin-left: 3px; margin-top: 5px;" @click="getItem(product,'view')" class="btn btn-sm btn-warning rounded-circle text-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-search-line text-sm"></i></a>
                             </td>
                         </tr>
                     </tbody>
@@ -131,11 +134,11 @@
                                             </div>
                                             <div class="col" style="padding-top:10px;">
                                                 <label v-if="form=='insert' || form=='update' || form=='view'" class="form-label">Expired</label>
-                                                <input v-if="form=='insert' || form=='update'" class="form-control" label="Product Expired*" type="date" v-model="vdata.expired">
+                                                <input v-if="form=='insert' || form=='update'" class="form-control" label="Product Expired*" type="date" v-model="vdata.expired" required>
                                             </div>
                                             <div class="col" style="padding-top:10px;">
                                                 <label v-if="form=='insert' || form=='update' || form=='view'" for="formFile" class="form-label">Attachment</label>
-                                                <input v-if="form=='insert' || form=='update'" class="form-control" type="file" id="attch" accept="application/pdf" ref="file">
+                                                <input v-if="form=='insert' || form=='update'" class="form-control" type="file" id="file" accept="application/pdf" ref="file" v-on:change="handleFileUpload()">
                                             </div>
                                         </div>
                                     </div>
@@ -165,7 +168,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <div class="card">
-                    <h3 class="card-header">Data Chart Block</h3>
+                        <h3 class="card-header">Data Chart Block</h3>
                         <div class="card-body">
                             <div id="chart"></div>
                         </div>
@@ -173,7 +176,7 @@
                 </div>
                 <div class="col-sm-6">
                     <div class="card">
-                    <h3 class="card-header">Data Chart Spline</h3>
+                        <h3 class="card-header">Data Chart Spline</h3>
                         <div class="card-body">
                             <div id="chart2"></div>
                         </div>
@@ -198,7 +201,6 @@
     <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.0.0/mdb.min.js"></script> -->
 
     <script type="module">
-        let file;
         let formData;
         new Vue({
             el: '#app',
@@ -214,7 +216,8 @@
                     alert: false,
                     alert1: false,
                     alert2: false,
-                    alert3: false
+                    alert3: false,
+                    file: ''
                 }
             },
             mounted: function() {},
@@ -242,21 +245,31 @@
                             console.log(err);
                         })
                 },
-                uploadFile: function() {
-                    file = document.getElementById('attch').value;
-                    this.file = this.$refs.file.files[0];
-                    // this.file = this.$refs.file.files[0];
-                    // formData = new FormData();
-                    // formData.append('file', this.file);
-                    // this.$refs.file.value = '';
-                    // console.log('ini formData :', formData);
+                //async menunggu method ini di run maka method selanjutnya tidak bisa jalan dulu
+                async submitFile() {
+                    formData = new FormData();
+                    formData.append('file', this.file);
+                    return await axios.post('product/upload',
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        }
+                    )
                 },
                 // Save Product
-                saveProduct: function() {
-                    this.uploadFile();
-                    console.log(file);
-                    this.vdata.attch = file;
-                    axios.post('product/save', this.vdata)
+                saveProduct: async function() {
+                    let res = await this.submitFile(); //bagusnya metode ini karena dapat mengetahui jika method sebelumnya gagal
+                    if (res.data.success == '2') {
+                        alert('File gagal di upload')
+                        return
+                    }
+                    this.vdata.attch = res.data.filepath;
+                    axios.post('product/save', this.vdata, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        })
                         .then(res => {
                             // handle success
                             this.getProducts();
@@ -264,15 +277,19 @@
                             this.productPrice = '';
                             this.expired = '';
                             this.attch = '';
-                            console.log("ending");
                             this.popAlert('alert1');
                             // document.getElementById('modal-alert').classList.remove('animated__fadeOutDown');
                             // this.$forceUpdate();
+                            console.log('SUCCESS!!')
                         })
                         .catch(err => {
                             // handle error
+                            console.log('FAILURE!!');
                             console.log(err);
                         })
+                },
+                handleFileUpload() {
+                    this.file = this.$refs.file.files[0];
                 },
                 // Get Item Edit, View, delete Product
                 getItem: function(product, modal) {

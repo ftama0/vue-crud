@@ -44,24 +44,19 @@ class Product extends Controller
     //     $Delete['CREATED_AT'] = Time::now()->format('Y-m-d H:i:s');
     //     $model->insert($json);
     // }
-    public function save()
+    public function upload()
     {
-        $product_name = $this->request->getVar('product_name');
-        $product_price = $this->request->getVar('product_price');
-        $expired = $this->request->getVar('expired');
-        $validation = \Config\Services::validation();
-        $attch = $validation->setRules([
-            'attch' => 'uploaded[file]|max_size[file,5000]|ext_in[pdf],'
-        ]);
-        if ($attch = $this->request->getFile('attch')) {
-            if ($attch->isValid() && !$attch->hasMoved()) {
+        if ($file = $this->request->getFile('file')) {
+            if ($file->isValid() && !$file->hasMoved()) {
                 // Get att name and extension
-                $name = $attch->getName();
-                $ext = $attch->getClientExtension();
-                $filepath = WRITEPATH . 'uploads/' . $attch->store();
+                $name = $file->getName();
+                $ext = $file->getClientExtension();
+                $filepath = WRITEPATH . 'uploads/' . $file->store();
+
                 // Response
                 $data['success'] = 1;
                 $data['message'] = 'Uploaded Successfully!';
+                $data['name'] = $name;
                 $data['filepath'] = $filepath;
                 $data['extension'] = $ext;
             } else {
@@ -70,6 +65,15 @@ class Product extends Controller
                 $data['message'] = 'File not uploaded.';
             }
         }
+        return $this->response->setJSON($data);
+    }
+
+    public function save()
+    {
+        $product_name = $this->request->getVar('product_name');
+        $product_price = $this->request->getVar('product_price');
+        $expired = $this->request->getVar('expired');
+        $filepath = $this->request->getVar('attch');
         $data = [
             'product_name' => $product_name,
             'product_price'  => $product_price,
