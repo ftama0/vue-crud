@@ -1,27 +1,12 @@
-# CodeIgniter 4 Application Starter
-
-## What is CodeIgniter?
-
-CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
-More information can be found at the [official site](http://codeigniter.com).
-
-This repository holds a composer-installable app starter.
-It has been built from the
-[development repository](https://github.com/codeigniter4/CodeIgniter4).
-
-More information about the plans for version 4 can be found in [the announcement](http://forum.codeigniter.com/thread-62615.html) on the forums.
-
-The user guide corresponding to this version of the framework can be found
-[here](https://codeigniter4.github.io/userguide/).
+# CRUD using CodeIgniter 4 with Vue.JS 3
 
 ## Installation & updates
 
-`composer create-project codeigniter4/appstarter` then `composer update` whenever
-there is a new release of the framework.
-
-When updating, check the release notes to see if there are any changes you might need to apply
-to your `app` folder. The affected files can be copied or merged from
-`vendor/codeigniter4/framework/app`.
+- Clone this repository.
+- Run `composer install`, then `composer update` if needed.
+- Run `php spark migrate` or `php spark migrate:rollback`. if needed.
+- Run `php spark db:seed DataSeeder`. if needed.
+- Run development server using `php spark serve`.
 
 ## Setup
 
@@ -39,14 +24,6 @@ framework are exposed.
 
 **Please** read the user guide for a better explanation of how CI4 works!
 
-## Repository Management
-
-We use GitHub issues, in our main repository, to track **BUGS** and to track approved **DEVELOPMENT** work packages.
-We use our [forum](http://forum.codeigniter.com) to provide SUPPORT and to discuss
-FEATURE REQUESTS.
-
-This repository is a "distribution" one, built by our release preparation script.
-Problems with it can be raised on our forum, or as issues in the main repository.
 
 ## Server Requirements
 
