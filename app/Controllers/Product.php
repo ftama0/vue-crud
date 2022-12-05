@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use CodeIgniter\Controller;
 use App\Models\ProductModel;
+use App\Models\CompanyModel;
 use CodeIgniter\API\ResponseTrait;
 use CodeIgniter\I18n\Time;
 
@@ -12,7 +13,20 @@ class Product extends Controller
     use ResponseTrait;
     public function index()
     {
-        echo view('product_view');
+        // $company = new CompanyModel();
+        // $company = $company->builder();
+        // $company->select("*");
+        // $data['company'] = $company->get()->getResultArray();
+        // d($data);
+        $db = \Config\Database::connect();
+        $query = $db->query("SELECT ABS(SUM(finance.profit)) as profit,MONTH(finance.transaction) AS bulan, c.code_comp, finance.code_comp,  finance.transaction AS month
+        FROM company c
+        INNER JOIN finance ON c.code_comp=finance.code_comp
+        GROUP BY bulan, c.code_comp
+        ORDER BY c.code_comp;");
+        $data['company'] = $query->getResult();
+        d($data);
+        echo view('product_view', $data);
     }
     public function getProduct()
     {
@@ -20,7 +34,8 @@ class Product extends Controller
         $query = $db->query("
         SELECT *
         FROM product
-        WHERE DELETED_AT IS null;");;
+        WHERE DELETED_AT IS null;");
+        // $data['company'] = $query->getResult();
         return $this->respond($query->getResult(), 200);
     }
 

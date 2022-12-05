@@ -47,6 +47,10 @@ $routes->group('testing', function ($routes) {
     $routes->get('/', 'Testing::index');
     $routes->post('save', 'Testing::save');
 });
+$routes->group('testing2', function ($routes) {
+    $routes->get('/', 'Testing2::index');
+    $routes->post('save', 'Testing2::save');
+});
 /*
  * --------------------------------------------------------------------
  * Additional Routing

@@ -8,7 +8,6 @@
     <title>Product List</title>
     <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet"> -->
     <!-- <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet"> -->
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.13"></script>
     <!-- <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet"> -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -37,19 +36,24 @@
         .modul-alert.delete {
             background-color: #FF8787;
         }
+
+        .button {
+            margin-left: 3px;
+            margin-top: 5px;
+            color: #F9F9F9;
+            font-size: 12px;
+        }
+
+        .button:hover {
+            animation: pulse;
+            animation-duration: 2s;
+        }
     </style>
 </head>
 
 <body>
+
     <div id="app">
-        <!-- Trigger buttons -->
-        <!-- <button @click="getAlert" type="button" id="primary" class="btn btn-primary m-1">Primary</button> -->
-
-        <!-- Alerts -->
-        <!-- <div class="animate__animated animate__bounceInDown modul-alert" id="modal-alert" v-if="alert1">
-            A simple primary alert with
-        </div> -->
-
         <main>
             <!-- Table List Product -->
             <!-- Start Nav List Product -->
@@ -62,8 +66,9 @@
                         Add Data
                     </button>
                     <li class="breadcrumb-item"><a href="<?= site_url("/testing") ?>">testing</a></li>
+                    <li class="breadcrumb-item"><a href="<?= site_url("/testing2") ?>">testing2</a></li>
                     <form class="d-flex">
-                        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" v-model="search">
+                        <input class="form-control me-2" type="search" placeholder="Search Product Name" aria-label="Search" v-model="search">
                     </form>
                 </div>
             </nav>
@@ -72,6 +77,7 @@
             <!-- Start Table List Product -->
             <div class="table-responsive">
                 <table class="table table-bordered datatable text-center">
+                    </th>
                     <thead>
                         <tr style="background-color: #CFF5E7">
                             <th scope="col">Product Name</th>
@@ -86,11 +92,11 @@
                             <td>{{ product.product_name }}</td>
                             <td>Rp. {{ product.product_price }}</td>
                             <td>{{ product.expired }}</td>
-                            <td> <a style="margin-left: 3px; margin-top: 5px;" class="btn btn-info rounded-circle text-sm"><i class="ri-download-cloud-fill" class="my-1 py-1 ri-file-edit-fill text-sm"></i></a></td>
+                            <td> <a class="btn btn-sm btn-success rounded-circle text-sm button"><i class="my-1 py-1 ri-download-cloud-line text-sm"></i></a></td>
                             <td>
-                                <a style="margin-left: 3px; margin-top: 5px;" @click="getItem(product,'update')" class="btn btn-sm btn-primary rounded-circle text-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-file-edit-fill text-sm"></i></a>
-                                <a style="margin-left: 3px; margin-top: 5px;" @click="getItem(product,'delete')" class="btn btn-sm btn-danger rounded-circle text-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-delete-bin-2-fill text-sm"></i></a>
-                                <a style="margin-left: 3px; margin-top: 5px;" @click="getItem(product,'view')" class="btn btn-sm btn-warning rounded-circle text-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-search-line text-sm"></i></a>
+                                <a @click="getItem(product,'update')" class="btn btn-sm btn-primary rounded-circle text-sm button" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-file-edit-fill text-sm"></i></a>
+                                <a @click="getItem(product,'delete')" class="btn btn-sm btn-danger rounded-circle text-sm button" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-delete-bin-2-fill text-sm"></i></a>
+                                <a @click="getItem(product,'view')" class="btn btn-sm btn-warning rounded-circle text-sm button" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-search-line text-sm"></i></a>
                             </td>
                         </tr>
                     </tbody>
@@ -104,8 +110,9 @@
             <!-- End Table List Product -->
             <!-- --------------------------------------------------------------------------------------------------------------------------------------- -->
             <!-- Modal Save Product -->
-            <form action="">
-                <div v-if="modal">
+            <!-- form=='insert'?saveProduct:form=='update'?updateProduct:deleteProduct -->
+            <form action="" @submit.prevent="saveProduct" v-if="modal">
+                <div>
                     <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" v-if="form=='insert' || form=='update' || form=='view' || form=='delete'">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
@@ -121,7 +128,7 @@
                                         <div class="row">
                                             <h4 v-if="form=='delete'">Are sure want to delete <strong class="text-danger">"{{ vdata.product_name }}"</strong> ?</h4>
                                             <div class="col">
-                                                <label v-if="form=='insert' || form=='update' || form=='view'" class="form-label">Product Name</label>
+                                                <label v-if="form=='insert' || form=='update' || form=='view'" class="form-label">Product Name <b style="color: red;" v-for="error in errors">{{ error }}</b></label>
                                                 <input type="text" v-if="form=='insert' || form=='update'" label="Product Name*" v-model="vdata.product_name" required>
                                                 <input type="text" v-else-if="form=='view'" label="Product Name*" v-model="vdata.product_name" disabled>
                                                 </input>
@@ -145,13 +152,14 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" @click="saveProduct" v-if="form=='insert'">Save</button>
-                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="updateProduct" v-else-if="form=='update'">Update</button>
-                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" @click="deleteProduct" v-else-if="form=='delete'">Delete</button>
+                                    <button type="submit" class="btn btn-success" v-if="form=='insert'">Save</button>
+                                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" v-else-if="form=='update'">Update</button>
+                                    <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" v-else-if="form=='delete'">Delete</button>
                                     <!--    <button @click="getAlert" type="button" id="primary" class="btn btn-primary m-1">Primary</button> -->
                                 </div>
                             </div>
                         </div>
+                        <button type="button" id="closeModal" class="btn btn-secondary" style="position:absolute;z-index:-100;top:-1000px;" data-bs-dismiss="modal"></button>
                     </div>
                 </div>
             </form>
@@ -163,22 +171,22 @@
             <!-- End Modal Save Product -->
             <!-- Button trigger modal -->
 
-
-
-            <div class="row">
-                <div class="col-sm-6">
-                    <div class="card">
-                        <h3 class="card-header">Data Chart Block</h3>
-                        <div class="card-body">
-                            <div id="chart"></div>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="card">
+                            <h3 class="card-header">Data Chart Block</h3>
+                            <div class="card-body">
+                                <div id="chart"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="col-sm-6">
-                    <div class="card">
-                        <h3 class="card-header">Data Chart Spline</h3>
-                        <div class="card-body">
-                            <div id="chart2"></div>
+                    <div class="col-sm-6">
+                        <div class="card">
+                            <h3 class="card-header">Data Chart Spline</h3>
+                            <div class="card-body">
+                                <div id="chart2"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -217,10 +225,11 @@
                     alert1: false,
                     alert2: false,
                     alert3: false,
-                    file: ''
+                    file: '',
+                    chart: <?= json_encode($company) ?>,
+                    errors: []
                 }
             },
-            mounted: function() {},
             created: function() {
                 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
                 this.getProducts();
@@ -228,7 +237,7 @@
             computed: {
                 filterData() {
                     let data = this.products
-                    data = data.filter(e => e.product_name.indexOf(this.search) != -1);
+                    data = data.filter(e => e.product_name.toLowerCase().indexOf(this.search.toLowerCase()) != -1);
                     return data;
                 }
             },
@@ -239,54 +248,76 @@
                         .then(res => {
                             // handle success
                             this.products = res.data;
+                            // this.products = res.data.company;
                         })
                         .catch(err => {
                             // handle error
                             console.log(err);
                         })
                 },
+                // checkForm: async function(e) {},
                 //async menunggu method ini di run maka method selanjutnya tidak bisa jalan dulu
-                async submitFile() {
-                    formData = new FormData();
-                    formData.append('file', this.file);
-                    return await axios.post('product/upload',
-                        formData, {
-                            headers: {
-                                'Content-Type': 'multipart/form-data'
-                            }
-                        }
-                    )
-                },
+                // async submitFile() {
+                //     formData = new FormData();
+                //     formData.append('file', this.file);
+                //     return await axios.post('product/upload',
+                //         formData, {
+                //             headers: {
+                //                 'Content-Type': 'multipart/form-data'
+                //             }
+                //         }
+                //     )
+                // },
+
+                hideFunc() {},
                 // Save Product
-                saveProduct: async function() {
-                    let res = await this.submitFile(); //bagusnya metode ini karena dapat mengetahui jika method sebelumnya gagal
-                    if (res.data.success == '2') {
-                        alert('File gagal di upload')
-                        return
+                saveProduct: function(e) {
+                    console.log('cek')
+                    document.getElementById('closeModal').click();
+                    console.log(this.vdata.product_price);
+                    e.preventDefault();
+                    this.errors = [];
+                    if (this.vdata.product_price == null) {
+                        this.errors.push(" *required.");
+                        console.log('Bener');
+                    } else {
+                        console.log('Tidak ada apa2');
                     }
-                    this.vdata.attch = res.data.filepath;
-                    axios.post('product/save', this.vdata, {
-                            headers: {
-                                'Content-Type': 'multipart/form-data'
-                            }
-                        })
-                        .then(res => {
-                            // handle success
-                            this.getProducts();
-                            this.productName = '';
-                            this.productPrice = '';
-                            this.expired = '';
-                            this.attch = '';
-                            this.popAlert('alert1');
-                            // document.getElementById('modal-alert').classList.remove('animated__fadeOutDown');
-                            // this.$forceUpdate();
-                            console.log('SUCCESS!!')
-                        })
-                        .catch(err => {
-                            // handle error
-                            console.log('FAILURE!!');
-                            console.log(err);
-                        })
+                    // e.preventDefault();
+                    // this.errors = [];
+                    // if (this.product_name == 0) {
+                    //     this.errors.push("Product name is required.");
+                    // } else {
+                    //     let res = await this.submitFile(); //bagusnya metode ini karena dapat mengetahui jika method sebelumnya gagal
+                    //     if (res.data.success == '2') {
+                    //         alert('File gagal di upload')
+                    //         return
+                    //     }
+                    //     this.vdata.attch = res.data.filepath;
+                    //     axios.post('product/save', this.vdata, {
+                    //             headers: {
+                    //                 'Content-Type': 'multipart/form-data'
+                    //             }
+                    //         })
+                    //         .then(res => {
+                    //             // handle success
+                    //             this.getProducts();
+                    //             this.productName = '';
+                    //             this.productPrice = '';
+                    //             this.expired = '';
+                    //             this.attch = '';
+                    //             this.popAlert('alert1');
+                    //             // document.getElementById('modal-alert').classList.remove('animated__fadeOutDown');
+                    //             // this.$forceUpdate();
+                    //             console.log('SUCCESS!!')
+                    //         })
+                    //         .catch(err => {
+                    //             // handle error
+                    //             console.log('FAILURE!!');
+                    //             console.log(err);
+                    //         })
+                    // }
+
                 },
                 handleFileUpload() {
                     this.file = this.$refs.file.files[0];
@@ -357,60 +388,61 @@
                         }, 500);
                     }, 2500);
                 },
-
+            },
+            mounted: function() {
+                let key = [...new Set(this.chart.map(e => e.code_comp))];
+                let data = key.map(e => {
+                    return {
+                        name: e,
+                        data: this.chart.filter(k => e == k.code_comp).map(x => x.profit)
+                    }
+                })
+                console.log(data)
+                var options = {
+                    series: data,
+                    chart: {
+                        type: 'bar',
+                        height: 350
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: false,
+                            columnWidth: '55%',
+                            endingShape: 'rounded'
+                        },
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                    },
+                    xaxis: {
+                        categories: ['Oct', 'Nov', 'Des'],
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'Rp. (Rupiah)'
+                        }
+                    },
+                    fill: {
+                        opacity: 1
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(val) {
+                                return "Rp. " + val + ",00"
+                            }
+                        }
+                    }
+                };
+                var chart = new ApexCharts(document.querySelector("#chart"), options);
+                chart.render();
             },
         })
-        var options = {
-            series: [{
-                name: 'Net Profit',
-                data: [44, 55, 57, 56, 61, 58, 63, 60, 66]
-            }, {
-                name: 'Revenue',
-                data: [76, 85, 101, 98, 87, 105, 91, 114, 94]
-            }, {
-                name: 'Free Cash Flow',
-                data: [35, 41, 36, 26, 45, 48, 52, 53, 41]
-            }],
-            chart: {
-                type: 'bar',
-                height: 350
-            },
-            plotOptions: {
-                bar: {
-                    horizontal: false,
-                    columnWidth: '55%',
-                    endingShape: 'rounded'
-                },
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                show: true,
-                width: 2,
-                colors: ['transparent']
-            },
-            xaxis: {
-                categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
-            },
-            yaxis: {
-                title: {
-                    text: '$ (thousands)'
-                }
-            },
-            fill: {
-                opacity: 1
-            },
-            tooltip: {
-                y: {
-                    formatter: function(val) {
-                        return "$ " + val + " thousands"
-                    }
-                }
-            }
-        };
-        var chart = new ApexCharts(document.querySelector("#chart"), options);
-        chart.render();
+
 
 
         var options = {
