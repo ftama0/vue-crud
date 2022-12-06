@@ -37,6 +37,7 @@ $routes->set404Override();
 // $routes->get('/', 'Home::index');
 $routes->get('/', 'Product::index');
 $routes->get('product/getproduct', 'Product::getProduct');
+$routes->post('product/download_pdf', 'Product::download_pdf');
 $routes->post('product/save', 'Product::save');
 $routes->post('product/upload', 'Product::upload');
 $routes->put('product/update/(:any)', 'Product::update/$1');

@@ -19,8 +19,8 @@
             position: fixed;
             top: 10px;
             right: 10px;
-            width: 40vw;
-            height: 10%;
+            width: 20vw;
+            /* height: 10%; */
             z-index: 10;
             background-color: #B6E2A1;
             border-radius: 10px;
@@ -60,8 +60,8 @@
             <nav class="navbar navbar-dark bg-dark">
                 <div class="container-fluid">
                     <a class="navbar-brand" style="margin-bottom: 10px;"><i class="ri-vuejs-line">ue.Js CRUD </i></a>
-                    <button @click="modal = true;
-                                    form='insert';
+                    <!-- modal='true';  di dalam @click button di bawah untuk model tanpa boostrap -->
+                    <button @click="form='insert';
                                     vdata={}" type="button" style="margin-bottom: 10px;" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                         Add Data
                     </button>
@@ -82,6 +82,7 @@
                         <tr style="background-color: #CFF5E7">
                             <th scope="col">Product Name</th>
                             <th scope="col">Price</th>
+                            <th scope="col">Stock</th>
                             <th scope="col">Expired</th>
                             <th scope="col">Download</th>
                             <th scope="col">Action</th>
@@ -91,8 +92,9 @@
                         <tr v-for="product in filterData" :key="product.product_id">
                             <td>{{ product.product_name }}</td>
                             <td>Rp. {{ product.product_price }}</td>
+                            <td>{{ product.stock }}</td>
                             <td>{{ product.expired }}</td>
-                            <td> <a class="btn btn-sm btn-success rounded-circle text-sm button"><i class="my-1 py-1 ri-download-cloud-line text-sm"></i></a></td>
+                            <td> <a @click="download(getItem(product))" class="btn btn-sm btn-success rounded-circle text-sm button"><i class="my-1 py-1 ri-download-cloud-line text-sm"></i></a></td>
                             <td>
                                 <a @click="getItem(product,'update')" class="btn btn-sm btn-primary rounded-circle text-sm button" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-file-edit-fill text-sm"></i></a>
                                 <a @click="getItem(product,'delete')" class="btn btn-sm btn-danger rounded-circle text-sm button" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> <i class="my-1 py-1 ri-delete-bin-2-fill text-sm"></i></a>
@@ -110,66 +112,71 @@
             <!-- End Table List Product -->
             <!-- --------------------------------------------------------------------------------------------------------------------------------------- -->
             <!-- Modal Save Product -->
-            <!-- form=='insert'?saveProduct:form=='update'?updateProduct:deleteProduct -->
-            <form action="" @submit.prevent="saveProduct" v-if="modal">
-                <div>
-                    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" v-if="form=='insert' || form=='update' || form=='view' || form=='delete'">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
+            <!-- form=='insert'?saveProduct():form=='update'?updateProduct():deleteProduct() ---- ternary operator untuk di form-->
+            <!-- v-if="modal"  - --- - Unutk di modal jika tidak menggunakan boostrap.-->
+            <form action="" @submit.prevent="form=='insert'?saveProduct():form=='update'?updateProduct():deleteProduct()">
+                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" v-if="form=='insert' || form=='update' || form=='view' || form=='delete'">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="staticBackdropLabel" v-if="form=='insert'">Add New Product</h5>
+                                <h5 class="modal-title" id="staticBackdropLabel" v-else-if="form=='update'">Update Product</h5>
+                                <h5 class="modal-title" id="staticBackdropLabel" v-else-if="form=='view'">View Product</h5>
+                                <h5 class="modal-title" id="staticBackdropLabel" v-else-if="form=='delete'">Delete Product</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="staticBackdropLabel" v-if="form=='insert'">Add New Product</h5>
-                                    <h5 class="modal-title" id="staticBackdropLabel" v-else-if="form=='update'">Update Product</h5>
-                                    <h5 class="modal-title" id="staticBackdropLabel" v-else-if="form=='view'">View Product</h5>
-                                    <h5 class="modal-title" id="staticBackdropLabel" v-else-if="form=='delete'">Delete Product</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="modal-header">
+                                    <div class="container">
+                                        <h4 v-if="form=='delete'">Are sure want to delete <strong class="text-danger">"{{ vdata.product_name }}"</strong> ?</h4>
                                         <div class="row">
-                                            <h4 v-if="form=='delete'">Are sure want to delete <strong class="text-danger">"{{ vdata.product_name }}"</strong> ?</h4>
-                                            <div class="col">
-                                                <label v-if="form=='insert' || form=='update' || form=='view'" class="form-label">Product Name <b style="color: red;" v-for="error in errors">{{ error }}</b></label>
-                                                <input type="text" v-if="form=='insert' || form=='update'" label="Product Name*" v-model="vdata.product_name" required>
-                                                <input type="text" v-else-if="form=='view'" label="Product Name*" v-model="vdata.product_name" disabled>
+                                            <div class="col-6">
+                                                <label v-if="form=='insert' || form=='update' || form=='view'" class="form-label">Product Name</label>
+                                                <input type="text" v-if="form=='insert' || form=='update'" class="form-control" v-model="vdata.product_name" required>
+                                                <input type="text" v-else-if="form=='view'" class="form-control" v-model="vdata.product_name" disabled>
                                                 </input>
                                             </div>
-                                            <div class="col">
+                                            <div class="col-6">
                                                 <label v-if="form=='insert' || form=='update' || form=='view'" class="form-label">Product Price</label>
-                                                <input type="number" v-if="form=='insert' || form=='update'" class="form-control" label="Price*" v-model="vdata.product_price" required>
-                                                <input type="number" v-else-if="form=='view'" label="Price*" v-model="vdata.product_price" disabled>
+                                                <input type="number" v-if="form=='insert' || form=='update'" class="form-control" v-model="vdata.product_price" required>
+                                                <input type="number" v-else-if="form=='view'" class="form-control" v-model="vdata.product_price" disabled>
                                                 </input>
                                             </div>
-                                            <div class="col" style="padding-top:10px;">
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6" style="padding-top:10px;">
                                                 <label v-if="form=='insert' || form=='update' || form=='view'" class="form-label">Expired</label>
-                                                <input v-if="form=='insert' || form=='update'" class="form-control" label="Product Expired*" type="date" v-model="vdata.expired" required>
+                                                <input type="date" v-if="form=='insert' || form=='update'" class="form-control" v-model="vdata.expired" required>
+                                                <input type="date" v-else-if="form=='view'" class="form-control" v-model="vdata.expired" disabled>
                                             </div>
-                                            <div class="col" style="padding-top:10px;">
+                                            <div class="col-6" style="padding-top:10px;">
                                                 <label v-if="form=='insert' || form=='update' || form=='view'" for="formFile" class="form-label">Attachment</label>
                                                 <input v-if="form=='insert' || form=='update'" class="form-control" type="file" id="file" accept="application/pdf" ref="file" v-on:change="handleFileUpload()">
+                                                <div v-else-if="form=='view'"> <a @click="download()" class="btn btn-sm btn-success text-sm button"><i class="my-1 py-1 ri-download-cloud-line text-sm"></i> Download</a></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-success" v-if="form=='insert'">Save</button>
-                                    <button type="submit" class="btn btn-primary" data-bs-dismiss="modal" v-else-if="form=='update'">Update</button>
-                                    <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" v-else-if="form=='delete'">Delete</button>
-                                    <!--    <button @click="getAlert" type="button" id="primary" class="btn btn-primary m-1">Primary</button> -->
-                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-success" v-if="form=='insert'">Save</button>
+                                <button type="submit" class="btn btn-primary" v-else-if="form=='update'">Update</button>
+                                <button type="submit" class="btn btn-danger" v-else-if="form=='delete'">Delete</button>
+                                <!--    <button @click="getAlert" type="button" id="primary" class="btn btn-primary m-1">Primary</button> -->
                             </div>
                         </div>
-                        <button type="button" id="closeModal" class="btn btn-secondary" style="position:absolute;z-index:-100;top:-1000px;" data-bs-dismiss="modal"></button>
                     </div>
+                    <!-- Button trigger close modal -->
+                    <button type="button" id="closeModal" class="btn btn-secondary" style="position:absolute;z-index:-100;top:-1000px;" data-bs-dismiss="modal"></button>
                 </div>
             </form>
             <div class="animate__animated animate__bounceInDown modul-alert" :class="alert2?'update':alert3?'delete':''" id="modal-alert" v-if="alert1 || alert2 || alert3">
-                <h6 v-if="alert1"> <i class="ri-checkbox-circle-fill"></i> Add data has been succces</h6>
-                <h6 v-else-if="alert2"><i class="ri-checkbox-circle-fill"></i> Update data has been succces</h6>
-                <h6 v-else-if="alert3"> <i class="ri-fire-fill"></i> Delete data has been succces</h6>
+                <h6 v-if="alert1"> <i class="ri-checkbox-circle-fill"></i> Add data succces</h6>
+                <h6 v-else-if="alert2"><i class="ri-checkbox-circle-fill"></i> Update data succces</h6>
+                <h6 v-else-if="alert3"> <i class="ri-fire-fill"></i> Delete data succces</h6>
             </div>
             <!-- End Modal Save Product -->
-            <!-- Button trigger modal -->
 
             <div class="container">
                 <div class="row">
@@ -212,11 +219,10 @@
         let formData;
         new Vue({
             el: '#app',
-            // vuetify: new Vuetify(),
             data() {
                 return {
                     products: [],
-                    modal: true, //variable di button add data dan modal save
+                    // modal: true, //variable close modal di button add data dan modal save TAPI gk diperlukan lagi karena sudah pake boostrap
                     form: 'insert',
                     search: '',
                     // page: 1,
@@ -227,7 +233,6 @@
                     alert3: false,
                     file: '',
                     chart: <?= json_encode($company) ?>,
-                    errors: []
                 }
             },
             created: function() {
@@ -255,102 +260,92 @@
                             console.log(err);
                         })
                 },
-                // checkForm: async function(e) {},
-                //async menunggu method ini di run maka method selanjutnya tidak bisa jalan dulu
-                // async submitFile() {
-                //     formData = new FormData();
-                //     formData.append('file', this.file);
-                //     return await axios.post('product/upload',
-                //         formData, {
-                //             headers: {
-                //                 'Content-Type': 'multipart/form-data'
-                //             }
-                //         }
-                //     )
-                // },
-
-                hideFunc() {},
-                // Save Product
-                saveProduct: function(e) {
-                    console.log('cek')
-                    document.getElementById('closeModal').click();
-                    console.log(this.vdata.product_price);
-                    e.preventDefault();
-                    this.errors = [];
-                    if (this.vdata.product_price == null) {
-                        this.errors.push(" *required.");
-                        console.log('Bener');
-                    } else {
-                        console.log('Tidak ada apa2');
-                    }
-                    // e.preventDefault();
-                    // this.errors = [];
-                    // if (this.product_name == 0) {
-                    //     this.errors.push("Product name is required.");
-                    // } else {
-                    //     let res = await this.submitFile(); //bagusnya metode ini karena dapat mengetahui jika method sebelumnya gagal
-                    //     if (res.data.success == '2') {
-                    //         alert('File gagal di upload')
-                    //         return
-                    //     }
-                    //     this.vdata.attch = res.data.filepath;
-                    //     axios.post('product/save', this.vdata, {
-                    //             headers: {
-                    //                 'Content-Type': 'multipart/form-data'
-                    //             }
-                    //         })
-                    //         .then(res => {
-                    //             // handle success
-                    //             this.getProducts();
-                    //             this.productName = '';
-                    //             this.productPrice = '';
-                    //             this.expired = '';
-                    //             this.attch = '';
-                    //             this.popAlert('alert1');
-                    //             // document.getElementById('modal-alert').classList.remove('animated__fadeOutDown');
-                    //             // this.$forceUpdate();
-                    //             console.log('SUCCESS!!')
-                    //         })
-                    //         .catch(err => {
-                    //             // handle error
-                    //             console.log('FAILURE!!');
-                    //             console.log(err);
-                    //         })
-                    // }
-
-                },
-                handleFileUpload() {
-                    this.file = this.$refs.file.files[0];
-                },
-                // Get Item Edit, View, delete Product
-                getItem: function(product, modal) {
-                    if (modal == 'update') {
+                // Get Item untuk modal Edit, View, delete Product
+                getItem: function(product, form) {
+                    if (form == 'update') {
                         this.form = 'update'
-                        this.modal = true;
-                    } else if (modal == 'view') {
+                        // this.modal = true; // harusnya gk kepake karena sudah pake modal boostrap
+                    } else if (form == 'view') {
                         this.form = 'view'
-                        this.modal = true;
+                        // this.modal = true;
                     } else {
                         this.form = 'delete'
-                        this.modal = true;
+                        // this.modal = true;
                     }
                     this.vdata = JSON.parse(JSON.stringify(product))
                 },
 
+                handleFileUpload() {
+                    this.file = this.$refs.file.files[0];
+                },
+                clearFileUpload() {
+                    this.$refs.file.value = null; //clear field input pada form file
+                },
+                //async menunggu method ini di run maka method selanjutnya tidak bisa jalan dulu
+                async upload() {
+                    formData = new FormData();
+                    formData.append('file', this.file);
+                    return await axios.post('product/upload',
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data'
+                            }
+                        }
+                    )
+                },
+                // Save Product
+                saveProduct: async function() { //di tutup dengan async function
+                    document.getElementById('closeModal').click();
+                    let res = await this.upload(); //bagusnya metode ini karena dapat mengetahui jika method sebelumnya gagal
+                    if (res.data.success == '2') {
+                        alert('File gagal di upload')
+                        return
+                    }
+                    this.vdata.attch = res.data.filepath;
+                    axios.post('product/save', this.vdata)
+                        .then(res => {
+                            // handle success
+                            this.getProducts();
+                            this.productName = '';
+                            this.productPrice = '';
+                            this.expired = '';
+                            this.attch = '';
+                            this.popAlert('alert1');
+                            this.clearFileUpload();
+                            // document.getElementById('modal-alert').classList.remove('animated__fadeOutDown');
+                            // this.$forceUpdate();
+                            console.log('SUCCESS!!')
+                        })
+                        .catch(err => {
+                            // handle error
+                            console.log('FAILURE!!');
+                            console.log(err);
+                        })
+
+                },
+
                 //Update Product
-                updateProduct: function() {
+                updateProduct: async function() {
+                    document.getElementById('closeModal').click();
+                    let res = await this.upload(); //bagusnya metode ini karena dapat mengetahui jika method sebelumnya gagal
+                    if (res.data.success == '2') {
+                        alert('File gagal di upload')
+                        return
+                    }
+                    this.vdata.attch = res.data.filepath;
                     axios.put(`product/update/${this.vdata.product_id}`, this.vdata)
                         .then(res => {
                             // handle success
                             this.getProducts();
                             this.popAlert('alert2');
+                            this.clearFileUpload();
+
                         })
                         .catch(err => {
                             // handle error
                             console.log(err);
                         })
                 },
-
                 //View Product
                 viewProduct: function() {
                     axios.put(`product/update/${this.vdata.product_id}`, this.vdata)
@@ -367,6 +362,7 @@
 
                 // Delete Product
                 deleteProduct: function() {
+                    document.getElementById('closeModal').click();
                     axios.delete(`product/delete/${this.vdata.product_id}`)
                         .then(res => {
                             // handle success
@@ -388,18 +384,36 @@
                         }, 500);
                     }, 2500);
                 },
+                download() {
+                    let data = {
+                        path: `${this.vdata.attch}`
+                    }
+                    let name = `${this.vdata.attch}`.split('/')[2]
+                    axios.post("<?= site_url() ?>" + `/product/download_pdf`, data, {
+                        responseType: 'blob'
+                    }).then(response => {
+                        const href = URL.createObjectURL(response.data);
+                        const link = document.createElement('a');
+                        link.href = href;
+                        link.setAttribute('download', `PDFku-0${this.vdata.product_id}.pdf`); //or any other extension
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
+
+                },
             },
             mounted: function() {
-                let key = [...new Set(this.chart.map(e => e.code_comp))];
-                let data = key.map(e => {
+                let key = [...new Set(this.chart.map(e => e.code_comp))]; //key map . Dari this.chart.map itu mendapatkan code company namun dengan ..new set menghilangkan duplikat unik variabel code company tsb.
+                let data = key.map(e => { //array dari variabel key tersebut di return sebagai object
                     return {
-                        name: e,
-                        data: this.chart.filter(k => e == k.code_comp).map(x => x.profit)
+                        name: e, //variabel name di graphic di isi dengan code.comp 
+                        data: this.chart.filter(k => e == k.code_comp).map(x => x.profit) // variabel data di graphic di filter untuk mendapatkan semua data profit sesuai dengan code company nya.
                     }
                 })
                 console.log(data)
                 var options = {
-                    series: data,
+                    series: data, //variabel data dari hasil mapping array
                     chart: {
                         type: 'bar',
                         height: 350
@@ -417,7 +431,8 @@
                     stroke: {
                         show: true,
                         width: 2,
-                        colors: ['transparent']
+                        // colors: ['transparent']
+                        colors: ['black']
                     },
                     xaxis: {
                         categories: ['Oct', 'Nov', 'Des'],
@@ -440,41 +455,38 @@
                 };
                 var chart = new ApexCharts(document.querySelector("#chart"), options);
                 chart.render();
+                var options = {
+                    series: [{
+                        name: 'series1',
+                        data: [31, 40, 28, 51, 42, 109, 100]
+                    }, {
+                        name: 'series2',
+                        data: [11, 32, 45, 32, 34, 52, 41]
+                    }],
+                    chart: {
+                        height: 350,
+                        type: 'area'
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'smooth'
+                    },
+                    xaxis: {
+                        type: 'datetime',
+                        categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
+                    },
+                    tooltip: {
+                        x: {
+                            format: 'dd/MM/yy HH:mm'
+                        },
+                    },
+                };
+                var chart2 = new ApexCharts(document.querySelector("#chart2"), options);
+                chart2.render();
             },
         })
-
-
-
-        var options = {
-            series: [{
-                name: 'series1',
-                data: [31, 40, 28, 51, 42, 109, 100]
-            }, {
-                name: 'series2',
-                data: [11, 32, 45, 32, 34, 52, 41]
-            }],
-            chart: {
-                height: 350,
-                type: 'area'
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                curve: 'smooth'
-            },
-            xaxis: {
-                type: 'datetime',
-                categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
-            },
-            tooltip: {
-                x: {
-                    format: 'dd/MM/yy HH:mm'
-                },
-            },
-        };
-        var chart2 = new ApexCharts(document.querySelector("#chart2"), options);
-        chart2.render();
     </script>
 </body>
 
