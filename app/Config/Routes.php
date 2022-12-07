@@ -17,7 +17,7 @@ if (is_file(SYSTEMPATH . 'Config/Routes.php')) {
  * --------------------------------------------------------------------
  */
 $routes->setDefaultNamespace('App\Controllers');
-$routes->setDefaultController('Product');
+$routes->setDefaultController('Home');
 $routes->setTranslateURIDashes(false);
 $routes->set404Override();
 // The Auto Routing (Legacy) is very dangerous. It is easy to create vulnerable apps
@@ -35,15 +35,25 @@ $routes->set404Override();
 // We get a performance increase by specifying the default
 // route since we don't have to scan directories.
 // $routes->get('/', 'Home::index');
-$routes->get('/', 'Product::index');
-$routes->get('product/getproduct', 'Product::getProduct');
-$routes->post('product/download_pdf', 'Product::download_pdf');
-$routes->post('product/save', 'Product::save');
-$routes->post('product/upload', 'Product::upload');
-$routes->put('product/update/(:any)', 'Product::update/$1');
-$routes->delete('product/delete/(:any)', 'Product::delete/$1');
 
+$routes->get('/', 'Login::index');
+$routes->post('/login/auth', 'Login::auth');
+$routes->get('/login/logout', 'Login::logout');
 
+$routes->group('register', function ($routes) {
+    $routes->get('/', 'Register::index');
+    $routes->post('save', 'Register::save');
+});
+
+$routes->group('product', ['filter' => 'auth'], function ($routes) {
+    $routes->get('/', 'Product::index');
+    $routes->get('getproduct', 'Product::getProduct');
+    $routes->post('download_pdf', 'Product::download_pdf');
+    $routes->post('save', 'Product::save');
+    $routes->post('upload', 'Product::upload');
+    $routes->put('update/(:any)', 'Product::update/$1');
+    $routes->delete('delete/(:any)', 'Product::delete/$1');
+});
 $routes->group('testing', function ($routes) {
     $routes->get('/', 'Testing::index');
     $routes->post('save', 'Testing::save');

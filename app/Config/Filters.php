@@ -23,6 +23,11 @@ class Filters extends BaseConfig
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
+        // Auth :
+        // 'csrf'     => CodeIgniter\Filters\CSRF::class,
+        // 'toolbar'  => CodeIgniter\Filters\DebugToolbar::class,
+        // 'honeypot' => CodeIgniter\Filters\Honeypot::class,
+        'auth'     => \App\Filters\Auth::class,
     ];
 
     /**

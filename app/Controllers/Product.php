@@ -18,6 +18,11 @@ class Product extends Controller
         // $company->select("*");
         // $data['company'] = $company->get()->getResultArray();
         // d($data);
+
+        //get data user dari session
+        // $session = session();
+        // $data['session'] = $session->get('user_name');
+
         $db = \Config\Database::connect();
         $query = $db->query("SELECT ABS(SUM(finance.profit)) as profit,MONTH(finance.transaction) AS bulan, c.code_comp, finance.code_comp,  finance.transaction AS month
         FROM company c
@@ -26,7 +31,7 @@ class Product extends Controller
         ORDER BY c.code_comp;");
         $data['company'] = $query->getResult();
         d($data);
-        echo view('product_view', $data);
+        echo view('productView', $data);
     }
     public function getProduct()
     {
@@ -51,7 +56,6 @@ class Product extends Controller
     //     $data = $model->findAll();
     //     return json_encode($data);
     // }
-    
     public function upload()
     {
         $validation = \Config\Services::validation();
@@ -95,6 +99,7 @@ class Product extends Controller
     {
         $model = new ProductModel();
         $json = $this->request->getJSON();
+        $json->CREATED_BY = session()->get('user_name');
         $json->CREATED_AT = Time::now()->format('Y-m-d H:i:s');
         $model->insert($json);
     }
@@ -107,8 +112,8 @@ class Product extends Controller
         $json->UPDATED_AT = Time::now()->format('Y-m-d H:i:s');
         $model->update($id, $json);
     }
-    
-    
+
+
     public function delete($id)
     {
         $model = new ProductModel();
@@ -131,7 +136,7 @@ class Product extends Controller
     //     $Delete['CREATED_AT'] = Time::now()->format('Y-m-d H:i:s');
     //     $model->insert($json);
     // }
-    
+
     // fungsi save yang panjang karena menggunakan getVar
     // public function save()
     // {
@@ -140,15 +145,15 @@ class Product extends Controller
     //     $expired = $this->request->getVar('expired');
     //     $filepath = $this->request->getVar('attch');
     //     $data = [
-        //         'product_name' => $product_name,
-        //         'product_price'  => $product_price,
-        //         'expired'       => $expired,
-        //         'attch' => $filepath,
-        //         'CREATED_AT'  => Time::now()->format('Y-m-d H:i:s'),
-        //     ];
-        //     $insert_Data = array_filter($data, function ($var) {
-            //         return $var != null;
-            //     });
+    //         'product_name' => $product_name,
+    //         'product_price'  => $product_price,
+    //         'expired'       => $expired,
+    //         'attch' => $filepath,
+    //         'CREATED_AT'  => Time::now()->format('Y-m-d H:i:s'),
+    //     ];
+    //     $insert_Data = array_filter($data, function ($var) {
+    //         return $var != null;
+    //     });
     //     $SaveModul = new ProductModel();
     //     $SaveModul->save($insert_Data);
     // }

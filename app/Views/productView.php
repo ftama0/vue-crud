@@ -48,6 +48,18 @@
             animation: pulse;
             animation-duration: 2s;
         }
+
+        .dropNav {
+            margin-bottom: 10px;
+            background-color: #0E5E6F;
+            border-radius: 10px;
+            border-color: #0E5E6F;
+        }
+
+        .dropNav:hover {
+            background-color: #0B4B58;
+            border-color: #0B4B58;
+        }
     </style>
 </head>
 
@@ -55,21 +67,46 @@
 
     <div id="app">
         <main>
+            <?php
+            $session = session();
+            $data['session'] = $session->get('user_name');
+            ?>
+
             <!-- Table List Product -->
             <!-- Start Nav List Product -->
             <nav class="navbar navbar-dark bg-dark">
                 <div class="container-fluid">
                     <a class="navbar-brand" style="margin-bottom: 10px;"><i class="ri-vuejs-line">ue.Js CRUD </i></a>
+                    <li>
+                        <div class="dropdown">
+                            <a style="color:#F9F9F9;" class="btn nav-link dropNav" id="navbarDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false"> <i class="ri-user-line"></i> <?php echo $data['session']; ?></a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" style="text-decoration:none; color:#0B4B58; " href="<?= site_url("/login/logout") ?>"><i style="color:red" class="ri-shut-down-line"></i> Logout</a>
+                            </ul>
+                        </div>
+                    </li>
                     <!-- modal='true';  di dalam @click button di bawah untuk model tanpa boostrap -->
-                    <button @click="form='insert';
-                                    vdata={}" type="button" style="margin-bottom: 10px;" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                        Add Data
-                    </button>
-                    <li class="breadcrumb-item"><a href="<?= site_url("/testing") ?>">testing</a></li>
-                    <li class="breadcrumb-item"><a href="<?= site_url("/testing2") ?>">testing2</a></li>
-                    <form class="d-flex">
-                        <input class="form-control me-2" type="search" placeholder="Search Product Name" aria-label="Search" v-model="search">
-                    </form>
+                    <li>
+                        <button @click=" form='insert' ; vdata={}" type="button" style="margin-bottom: 10px;" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                            Add Data
+                        </button>
+                    </li>
+                    <li>
+                        <div class="dropdown">
+                            <a style="color:#F9F9F9;" class="btn nav-link dropdown-toggle dropNav" href="#" id="navbarDropdown" role="a" data-bs-toggle="dropdown">
+                                Testing
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li class="dropdown-item"><a style="text-decoration:none; color:#0B4B58" href="<?= site_url("/testing") ?>"> testing 1</a></li>
+                                <li class="dropdown-item"><a style="text-decoration:none; color:#0B4B58" href="<?= site_url("/testing2") ?>"> testing 2</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li>
+                        <form class="d-flex">
+                            <input class="form-control me-2" type="search" placeholder="Search Product Name" aria-label="Search" v-model="search">
+                        </form>
+                    </li>
                 </div>
             </nav>
             <!-- End Nav List Product -->
